@@ -1,0 +1,91 @@
+\section{Decidability}
+
+\subsection*{Outline}
+
+\begin{itemize}
+	\item Definition af decidability.
+	\item Hvordan decidability bevises og eksempler 
+	\item Definition af undecidability
+	\item Hvordan undecidability bevises og eksempler  
+\end{itemize}
+
+\subsection*{Decidability}
+
+Et sprog $L$ er Turing decidable (afgørligt), hvis der eksisterer en TM $M$ s.t. $M$ accepterer en $s$ hvis og kun hvis $s \in L$. (Bemærk at hvis et sprog er decidable er det også recognizable men ikke vice versa.)\\
+
+\subsection*{At bevise decidability}
+
+Hvis $L$ er et decidable sprog kan man vise at $L$ er decidable ved at konstruere en decider $M$ s.t. $L(M)=L$. \\ 
+
+\subsubsection*{Eksempel 1}
+
+Lad $L=\{\langle G,M \rangle| \; G \text{ er en CFG og } M \text{ er en DFA og } L(G) \cap L(M)=\emptyset \}$. \\
+
+Følgende TM $N$ er en decider for $L$. På input $\langle G,M \rangle$ gør $M$ følgende:
+\begin{enumerate}
+	\item Konstruér en CFG $G'$ s.t. $L(G')=L(G) \cap L(M)$.\footnote{$G$ er et CFL og $M$ er et regulært sprog, så $L(G) \cap L(M)$ er et CFL.}
+	\item Marker alle terminale symboler i $G'$.\footnote{Trin 2-4 svarer til $E_{CFG}$, se s. 199f i Sipser. I trinnene testes om startvariablen i $G'$ kan generere en streng af terminaler.}
+	\item Gentag følgende indtil ingen nye variabler markeres:
+	\begin{enumerate}
+		\item Markér enhver variabel $A$ hvor $G'$ har en regel $A \rightarrow U_1 U_2 \cdots U_k$ og hvert symbol $U_1,U_2,\ldots,U_k$ allerede er markeret
+	\end{enumerate}
+	\item Hvis start variablen ikke er markeret, accept; eller reject. 
+\end{enumerate} 
+
+\subsubsection*{Eksempel 2}
+
+Lad $L=\{\langle M, w \rangle |; M \text{ er en TM der tager } \le 1332 \text{ trin på input } w\}$.\\
+
+Følgende 2-tape TM $N$ er en decider for $L$. På input $\langle M,w \rangle$ gør $M$ følgende: 
+\begin{enumerate}
+	\item Simulér $M$ på $w$ på tape 1 
+	\item På tape 2 tælles antal trin taget af $M$ på tape 1 (antager at vi har binary adder til rådighed).
+	\item Hvis $M$ accepts eller rejects \textit{og} tallet på tape 2 er højest 1332, accept. Hvis tallet på tape 2 bliver $>1332$ så reject.   
+\end{enumerate} 
+
+\subsection*{Undecidability}
+
+\textbf{Thm.} Der eksisterer sprog, der ikke er Turing recognizable. \\
+
+\textbf{Bevis.} Vi observerer først at kardinaliteten af mængden af TMs er tælleligt, uendelig. Lad $\Sigma=\{0,1\}$.\footnote{Alle TMs kan kodes i binær.} Vi har at $|\Sigma^*|=\aleph_0$ fordi der er et endeligt antal strenge af en given længde, så $\Sigma^*$ kan enumereres. Det er åbenlyst at $\Sigma^*$ rummer kodning af alle TMs (og mere til). Det følger at kardinaliteten af mængden af TMs er tælleligt, uendelig. \\
+
+Vi viser nu at kardinaliteten af mængden af sprog er overtællelig. Her viser vi først mængden af uendelige binære sekvenser er overtællelig vha. Cantors diagonaliseringsmetode: \\
+
+Hvis vi prøver at enumerere alle uendelige binære sevkenser er det altid muligt at finde en uendelig binær sekvens, der ikke er i enumerationen. Lad $b_i$ for $i \in \N$ være den $i$te sekvens i enumerationen. Vi konstruerer nu den uendelige bit-sekvens:
+\[b_i'= \left\{ \begin{array}{ll}1 & \mbox{if $b_{i_i} = 0$};\\0 & \mbox{if $b_{i_i}=1$}.\end{array} \right. \] 
+På denne måde er $b_i'$ forskellig fra $b_i$, $\forall i$ i mindst én position. Dette viser at mængden af uendelige binære sekvenser er overtællelig. \\
+
+Ethvert sprog kan defineres vha. en karakteristisk sekvens over $\Sigma^*$, hvor $1$ indikerer medlemskab og $0$ indikerer ikke-medlemskab. En sådan karakteristisk sekvens er en uendelig bit-sekvens fordi $\Sigma^*$ er uendelig. Så mængden af alle sprog er en bijektion med mængden bestående af alle uendelig bit-sekvenser. Det følger at kardinaliteten af mængden af sprog er overtællelig. \\
+
+Så der er tælleligt, uendelig mange TMs og overtælleligt (d.v.s. mange, mange flere!) sprog. Det følger at der eksisterer sprog, der ikke recognizes af nogen TM. \\
+\begin{flushright}
+	\qed
+\end{flushright}
+
+\textbf{Korr.} Der eksisterer sprog, der er undecidable. \\
+
+\textbf{Bevis.} Følger af bevis for Thm. fordi hvis et sprog er unrecognizable er det også undecidable.   
+\begin{flushright}
+	\qed
+\end{flushright}
+
+\subsection*{At bevise undecidability}
+
+Man kan enten bruge mapping reductions (vil ikke blive gjort her) eller modstridsbeviser. 
+
+\subsubsection*{Eksempel 1}
+
+Lad $A_{TM}=\{\langle M,w \rangle | \; M \text{ er en TM og } M \text{ accepterer } w\}$. \\
+
+\textbf{Thm.} $A_{TM}$ er undecidable. \\
+
+\textbf{Bevis.} Antag til modstrid at $H$ er en decider for $A_{TM}$. På input $\langle M, w \rangle$, hvor $M$ er en TM og $w$ er en streng gør $H$ følgende: 
+\[H(\langle M, w\rangle)= \left\{ \begin{array}{ll} accept & \mbox{hvis $M$ accepts $w$};\\reject & \mbox{hvis $M$ ikke accepts $w$}.\end{array} \right. \] 
+Lad $D$ være en ny TM der bruger $H$ som en subrutine til at afgøre, hvad $M$ gør når den får sig selv som input. $D$ gør følgende på input $\langle M \rangle$ ($D$ outputter altid det omvendte af $M$):
+\[D(\langle M\rangle)= \left\{ \begin{array}{ll} accept & \mbox{hvis $M$ ikke accepts $\langle M \rangle$};\\reject & \mbox{hvis $M$ accepts $\langle M \rangle$}.\end{array} \right. \] 
+Nu giver vi $D$ som input til sig selv, hvilket vil resultere i:
+\[D(\langle D \rangle)= \left\{ \begin{array}{ll} accept & \mbox{hvis $D$ ikke accepts $\langle D \rangle$};\\reject & \mbox{hvis $D$ accepts $\langle D \rangle$}.\end{array} \right. \] 
+Dette er åbenlyst en modstrid fordi lige meget hvad $D$ gør er den tvunget til at gøre det modsatte. Derfor kan hverken $H$ (eller $D$) kan eksistere og det følger at $A_{TM}$ er undecidable. 
+\begin{flushright}
+	\qed
+\end{flushright}

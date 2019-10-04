@@ -1,0 +1,96 @@
+\section{Adversary arguments -- techniques, examples}
+
+\subsection*{Outline}
+
+\begin{itemize}
+	\item Definition af adversary argument samt teknikker. 
+	\item Eksempel: Adversary strategy til at finde lower bound på antal sammenligninger for at finde medianen blandt $n$ tal.
+\end{itemize}
+
+\subsection*{Adversary argument, definition og teknikker}
+
+\textbf{Adversary argument når sammenligninger er den basale operation.} Vi betragter et problem og en algoritme til dette problem. Adversary er en `aktør' som algoritmen spiller imod. Algoritmen ønsker at minimere antallet af sammenligninger mens adversary'en ønsker at maksimere dem. Eller sagt på en anden måde: Adversary'en ønsker at give så lidt information som muligt ifm. en sammenligning. Den eneste regel for adversary'en er at denne skal svare på alle queries på en måde, der er konsistent med alle forrige svar. \\
+
+Én måde at formulere en adversary strategy på ved at give en fremgangsmåde, hvorpå der dannes en partiel, acyklisk ordning af en komplet graf. I dette tilfælde er en lower bound på antallet af sammenligninger lig med antallet af orienterede edges (arcs) det kræves for at et unikt svar findes.
+
+\subsection*{Eksempel: Lower bound for median problemer vha. adversary strategy}
+
+\textit{Median problemet.} Givet $n$ tal (antag at $n$ er ulige så median er unik) $x_1,\ldots,x_n$ ønsker vi at finde det $(n+1)/2$ tal når $\{x_1,\ldots,x_n\}$ er sorteret. \\
+
+Vi vil bruge en adversary strategy der benytter sig af at orientere edges i en komplet graf til at finde en lower bound for antallet af sammenligninger som enhver algoritme må bruge for at finde medianen af $n$ tal. \\
+
+\textit{Overordnet adversary strategy.\footnote{Notation: $D$: grafen, der orienteres. \\ $u\rightarrow v$: arc fra $u$ til $v$. \\ $d_D^+(v)$: out-degree for $v$. \\ $d_D^-(v)$: in-degree for $v$. \\ $d_D(v)=d_D^+(v) + d_D^-(v)$ \\ $\mathcal{L}_D(v)$: $v$ placering i acyklisk ordning af $D$.}} Giv så meget useless information som muligt, d.v.s. få algoritmen til at `spilde' så mange queries som muligt. \\
+
+Mere formelt: Vi opretholder konstant tre mængder ($S \sim$ smaller, $L \sim$ larger, $U \sim$ useless): 
+\begin{align*}
+	S =& \{v \in V| \; d_D(x)>0 \wedge\mathcal{L}_D(v)<(n+1)/2\} \\
+	L =& \{v \in V| \; d_D(x)>0 \wedge\mathcal{L}_D(v)>(n+1)/2\} \\
+	U =& V-S-L
+\end{align*}
+Adversary'en svarer queries $Q(x,y)$ efter følgende regler: 
+\begin{enumerate}
+	\item $x,y \in U \Longrightarrow S := S+x \wedge L := L+y$. Tilføj red arc $x \rightarrow y$. Placér $\mathcal{L}_D(x)=1$ og $\mathcal{L}_D(y)=n$. 
+	\item (W.l.o.g). $x \in S \wedge y \in U \Longrightarrow L := L+y$. Tilføj red arc $x \rightarrow y$. Placér $\mathcal{L}_D(y)=n$.
+	\item (W.l.o.g). $x \in L \wedge y \in U \Longrightarrow S := S+y$. Tilføj red arc $y \rightarrow x$. Placér $\mathcal{L}_D(y)=1$.
+	\item (W.l.o.g). $x \in S \wedge y \in L \Longrightarrow$ tilføj red arc $x \rightarrow y$. 
+	\item (W.l.o.g). $\mathcal{L}_D(x)<\mathcal{L}_D(y) \wedge(x,y \in S+m \vee x,y \in L+m) \Longrightarrow$ tilføj black arc $x \rightarrow y$. 
+\end{enumerate}
+samt disse restriktioner for at sikre at $|S|,|L|\le (n-1)/2$:
+\begin{enumerate}
+	\item (W.l.o.g). $|S|=(n-1)/2 \wedge |L|<(n-1)/2 \Longrightarrow$ alle $z \in U$ pånær 1 flyttes til $L$ og placeres sidst i $\mathcal{L}_D$. Det sidste element i $U$ flyttes til plads $(n+1)/2$ og er dermed medianen $m$.\footnote{$m$ betragtes som undefineret indtil $U = \emptyset$.}  
+\end{enumerate}
+\textbf{Lemma 1.} Hvis $D$ er acyklisk og en ny arc orienteres efter reglerne ovenfor, så er den resulterende digraph acyklisk og alle red arcs $u \rightarrow v$ opfylder at $\mathcal{L}_D(u)<(n+1)/2<\mathcal{L}_D(v)$. \\
+
+\textbf{Bevis.} \textit{Induktionsbevis for første del:}\\
+
+\textit{Basistrin:} En digraph med præcis én orienteret kant er acyklisk. \\ 
+
+\textit{IH:} $D$ med $k$ arcs er acyklisk.\\
+
+\textit{Induktionstrin:} 
+\begin{itemize}
+	\item I regel 1-3 tilføjes der kun arcs fra en knude i $S$ til en knude i $L$. I regel 1 placeres $x$ og $y$ i hver deres ende af $\mathcal{L}_D$. I regel 2-3 placeres knuden der fjernes fra $U$ enten i 1 eller $n$ i $\mathcal{L}_D$ (afhængig af om den ender i hhv. $S$ eller $L$ ). Da $D$ er acyklisk jf. IH kan en sådan arc altså heller ikke indføre en cycle, hvorfor digraphen forbliver acyklisk.
+	\item I regel 4 tilføjes en kant fra $S$ til $L$. Så da $D$ er acyklisk jf. IH vil den nye digraph også være det. 
+	\item I regel 5 tilføjes en kant der peger fremad i $\mathcal{L}_D$. Og da $D$ er acyklisk jf. IH vil den resulterende graf også være det.  
+\end{itemize}
+Anden del af beviset vises ikke men kan vises ved stærk induktion over antallet af red arcs. Beviset ligner det forrige men gør også brug af restriktionen foruden de regel 1-4. 
+% NÅR FREMLÆGGELSEN ØVES SÅ TJEK LIGE TIDEN. HVIS FREMLÆGGELSEN TAGER CA. <13 MINUTTER SÅ INKLUDER ANDEN DEL AF BEVISET OGSÅ. JEG SKAL HAVE STYR PÅ DET UNDER ALLE OMSTÆNDIGHEDER -- I TILFÆLDE AF AT DE SPØRGER IND TIL DET. 
+\begin{flushright}
+	\qed
+\end{flushright}
+
+\textbf{Thm.} Den ovenstående adversary strategy vil tvinge enhver sammenligningsbaseret algoritme $\mathcal{A}$ til at foretage $\ge 3n/2-3/2$ sammenligninger før medianen findes blandt $n$ unikke tal. \\
+
+\textbf{Bevis.} Hvis $D$ er en acyklisk digraph med en acyklisk ordning $\mathcal{L}_D$, hvor $\mathcal{L}_D(x)<\mathcal{L}_D(y)$ og der ikke er nogen orienteret sti fra $x$ til $y$, så kan $D$ ændres sådan at $\mathcal{L}_D(x)>\mathcal{L}_D(y)$. For at indse dette, så betragt nedenstående topologiske ordning af en graf $G$:
+\begin{center}
+	\includegraphics[width=0.75\textwidth]{grafApx1.JPG}
+\end{center}
+Tallene $1,1,1,2,3,3,4$ bruges til at indikere at disse knuder (1) ikke har nogen sti til hinanden og (2) åbenlyst kan byttes rundt uden videre. \\
+
+Bytter vi derimod fx $a$ og $f$ opstår følgende situation. Den arc med et kryds viser en ulovlig kant i den topologiske ordning (alle kanter skal pege fremad):
+\begin{center}
+	\includegraphics[width=0.75\textwidth]{grafApx2.JPG}
+\end{center}
+For at genoprette en lovlig topologisk ordning er det således nødvendigt at skubbe $d$ og $e$ om efter $a$ i den acykliske ordning og dermed opnå følgende: 
+
+\begin{center}
+	\includegraphics[width=0.75\textwidth]{grafApx3.JPG}
+\end{center}
+
+Sidstnævnte er altså et eksempel, hvor det ikke er tilstrækkeligt bare at bytte rundt på to knuder, der ikke har en sti til hinanden. Men konklusionen er stadig den samme: Man kan stadigvæk godt opretholde den acykliske orden hvis man rykker om på flere knuder også. \\
+
+Med andre ord: Når $\mathcal{A}$ terminerer må der eksistere en orienteret sti $x \rightarrow m \rightarrow y$ for alle par $x,y$, hvor $\mathcal{L}_D(x)<(n+1)/2<\mathcal{L}_D(y)$, fordi algoritmen er nødt til at vide at $x<m$ og $y>m$. Og hvis der ikke eksisterer en sådan sti er det ikke sikkert at $m$ kan bestemmes da vi kan ændre den acykliske ordning jf. ovenstående. \\
+
+Endvidere så består disse stier $x \rightarrow m \rightarrow y$ kun af black arcs da alle red arcs går fra $S$ til $L$. Så alle $x$ med $\mathcal{L}_D(x)<(n+1)/2$ må have mindst én black outgoing arc og alle $y$ med $\mathcal{L}_D(y)>(n+1)/2$ må have mindst én black ingoing arc. Det følger at der er mindst $n-1$ sorte arcs. \\
+
+Desuden kan adversary'en tilføje mindst $(n-1)/2$ red arcs eftersom at regel 1-3 kan bruges mindst $(n-1)/2$ gange (d.v.s. indtil $|S|=(n-1)/2$ eller $|L|=(n-1)/2$). \\
+
+Det følger at adversary'en alt i alt altid kan tilføje mindst 
+\begin{align*}
+n-1 +\frac{n-1}{2} = \frac{2(n-1)+n-1}{2}=\frac{3n-3}{2}=\frac{3n}{2}-\frac{3}{2}
+\end{align*}
+kanter, hvilket svarer til en lower bound på antallet af sammenligninger som $\mathcal{A}$ skal foretage for at finde medianen. 
+\begin{flushright}
+	\qed
+\end{flushright}
+

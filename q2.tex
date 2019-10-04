@@ -1,0 +1,101 @@
+\section{Pushdown automata and context-free languages}
+
+\subsection*{Outline}
+\begin{itemize}
+	\item Definition af context-free grammars og -sprog
+	\item Definition af pushdown automata 
+	%\item Bevis-skitse over ækvivalens af context-free languages og pushdown automata 
+	\item Eksempel på context-free sprog og pushdown automata
+	\item Bevis for Pumping lemmaet for context-free sprog
+	\item Eksempel på anvendelse af pumping lemmaet
+\end{itemize}
+
+\subsection*{Context-free grammars og -sprog}
+
+En context-free grammar (CFG) $M$ defineres som $M=(V, \Sigma, R, S)$, hvor 
+\begin{itemize}
+	\item $V$: variabler
+	\item $\Sigma$: Terminal symbols. NB: $\Sigma \cap V = \emptyset$ 
+	\item $R$: Substitutions-regler
+	\item $S \in S$: start-variabel 
+\end{itemize}
+
+Et sprog $L$ er context-free (CFL), hvis det genereres af en CFG. \\
+
+\textbf{Eksempel.} Lad $M=(\{S\}, \{0,1\},R, S)$, hvor $R$ er givet ved
+\begin{align*}
+	&S \rightarrow SS \; | \; 0 \; | \; 1
+\end{align*}
+være en CFG. Vi kan fx derive strengen 0011 (leftmost derivation): 
+\begin{align*}
+S \rightarrow SS \rightarrow \rightarrow SSS \rightarrow SSS \rightarrow 0SSS \rightarrow 00SS \rightarrow 001S \rightarrow 0011
+\end{align*}
+
+\subsection*{Pushdown automata}
+
+En (non-deterministisk) pushdown automaton $N$ kan defineres som en NFA med en stack, d.v.s. $N=(Q, \Sigma, \Gamma, \delta, q_0, F)$, hvor
+\begin{itemize}
+	\item $Q$: states
+	\item $\Sigma$: alfabet 
+	\item $\Gamma$: stack-alfabet 
+	\item $\delta$: transitionsfunktion, $Q \times \Sigma_{\varepsilon} \times \Gamma_{\varepsilon} \rightarrow \mathcal{P}(Q \times \Gamma_{\varepsilon})$
+	\item $q_0$: start state
+	\item $F$: accept states 
+\end{itemize}
+
+\textbf{Thm.} Et sprog $A$ er kontekstfrit $\Leftrightarrow$ $\exists$ pushdown automaton $M$ s.t. $L(M)=A$. (Bevises ikke). \\
+
+\textbf{Eksempel.} Lad $L=\{w\in \{a,b,c\}^*| \; \#_a(w) =\#_b(w)\}$. $L$ er et CFL fordi den følgende pushdown automaton $N=(\{q_0,q_1,q_2\}, \{a,b,c\}, \{a,b,\$\}, \delta, q_0, \{q_2\})$ har $L(N)=L$:
+
+\begin{center}
+	\begin{tikzpicture}[shorten >=1pt,node distance=4cm,on grid,auto] 
+	\node[state,initial] (q0) {$q_0$};
+	\node[state] (q1) [right=of q0] {$q_1$};
+	\node[state,accepting] (q2) [below=of q1] {$q_2$};
+	\path[->]
+	(q0) edge node {$\varepsilon,\varepsilon \rightarrow \$$} (q1)
+	(q1) edge [align=left,loop right] node {$a,\varepsilon \rightarrow a$\\$a,b \rightarrow \varepsilon$\\$b,\varepsilon \rightarrow b$\\$b,a\rightarrow \varepsilon$\\$c,\varepsilon \rightarrow \varepsilon$} ()
+	edge node {$\varepsilon, \$ \rightarrow \varepsilon$} (q2);
+	\end{tikzpicture}
+\end{center} 
+
+
+\subsection*{Pumping lemma for context-free sprog}
+
+Hvis $A$ er et CFL, så er det et tal $p$ (pumpe-længde) hvor, hvis $s \in A$ og $|s| \ge p$, så kan $s$ opdeles i 5 stykker, $s=uvxyz$, s.t. de følgende 3 betingelser tilfredsstilles: 
+\begin{itemize}
+	\item $\forall i \ge 0: uv^ixy^iz \in A$
+	\item $|vy| > 0$
+	\item $|vxy| \le p$. 
+\end{itemize} 
+
+\textbf{Bevis.} Lad $A$ være et CFL og $G$ være en CFG med $L(G)=A$. Lad $b$ være det maksimale antal symboler på højresiden af en regel i $G$. Det følger at en node i et vilkårligt parse tree (PT) opnået v.h.a. $G$ kan have $\le b$ børn, d.v.s. der er $\le b$ blade 1 trin fra roden, $\le b^2$ blade 2 trin fra roden etc. Det følger, at hvis højden på et PT er $\le h$ så er længden på den udledede streng (d.v.s. antal blade i PTet) $\le b^h$, og omvendt, hvis der er $\ge b^h+1$ blade i PTet, så er det $\ge h+1$ højt. \\
+
+Lad pumpe-længden $p=b^{|V|+1}$. Det følger at enhver streng $s \in A$, hvor $|s| \ge p$ har et PT, der er $\ge |V|+1$ højt fordi $b^{|V|+1} \ge b^{|V|}+1$. Betragt nu en vilkårlig streng $s$ som opfylder førnævnte. Lad $T$ være ét PT\footnote{Hvis grammatiken $G$ er ambiguous, vælg da det $T$ som udleder $s$ v.h.a. færrest muligt antal nodes.} der udledes $s$ fra $G$. $T$ er mindst $|V|+1$ højt (d.v.s. længste sti fra rod til blad) og indeholder mindst $|V|+2$ noder på denne længste rod-til-blad-sti. Bladet på denne sti er et terminal-symbol\footnote{Det er blade i PTer altid per definition.}, så $|V|+1$ af disse er symboler fra $V$. Det følger at $\exists R \in V$ som gentages på denne sti jf. pigeonhole princippet. Dette kan illustreres således:
+\begin{center}
+	\includegraphics[width=0.65\textwidth]{pumpingLemmaCFL.JPG}
+\end{center}
+Illustrationen viser også inddelingen af $s$ i $uvxyz$. \\
+
+Opfyldende af betingelserne:
+\begin{enumerate}
+	\item Da begge subtrees af $R$ er dannet af samme variabel kan de erstattes med hinanden uden videre. Ved at sætte det større subtree ind på det lille subtrees plads (evt. gentagne gange) kan strengene $uv^ixy^iz$ for $i>1$ opnås (nederste billede t.v.). Ved at sætte det lille subtree ind på det større subtrees plads opnås strengen $uv^0xy^0z=uxz$ (nederste billede t.h.). Så erstatningen er altså gyldig $\forall i \ge 0$.
+	\item $|vy|=0$ hvis $v=y=\varepsilon$. Hvis dette er tilfældet kan det større subtree sættes ind på det mindre subtrees plads og derved give et $T'$ der også udleder $s$ men indeholder færre nodes end $T$ (tænk på det ift. nederste billede t.h.; dette PT ville stadig generere $s$). Dette er en modstrid fordi $T$ er det parse tree med mindst mulige antal nodes. Det følger at betingelsen er opfyldt.
+	\item Vi sørger for at vælge $R$ s.t. de to gentagelser forekommer blandt de nederste $|V|+1$ variabler i $T$. Så det subtree $vxy$ som $R$ udleder kan have længde $ \le b^{|V|+1}=p$.     
+\end{enumerate}
+\begin{flushright}
+	\qed
+\end{flushright}
+\subsection*{Eksempel: Anvendelse af pumping lemmaet}
+
+Vi vil vise at $L=\{a^n b^n c^n| \; n \ge 0\}$ ikke er et CFL v.h.a. pumping lemmaet. \\
+
+Antag til modstrid at $L$ er et CFL. Lad $p$ være pumpe-længden (se beviset ovenfor). Vælg strengen $s=a^p b^p c^p \in L$. Da $|s| \ge p$ kan vi skrive $s=uvxyz$ jf. pumping lemmaet. Lad $s'=uv^2xy^2z$. Vi ved at mindst én af $v$ og $y$ er ikke-tom jf. betingelse 2 i pumping lemmaet. Følgende to cases skal betragtes:
+\begin{enumerate}
+	\item Hvis både $v$ og $y$ kun består af ét alfabet-symbol (ikke nødvendigvis det samme): Da må det være tilfældet at $s' \notin L$ fordi det er mindst et og højest  to af alfabet-symbolerne, hvis antal øges.
+	\item Hvis enten $v$ eller $y$ består af to alfabet-symboler (de kan ikke begge bestå af to alfabet-symboler jf. betingelse 3 i pumping lemmaet): Da må det være tilfældet at $s' \notin L$ fordi $s'$ indeholder alfabet-symboler, der ikke er i korrekt rækkefølge.   
+\end{enumerate} 
+D.v.s. at en modstrid er uundgåelig så $L$ er ikke et CFL.
+\begin{flushright}
+	\qed
+\end{flushright}

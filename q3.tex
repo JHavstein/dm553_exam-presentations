@@ -1,0 +1,112 @@
+\section{Turing machines}
+
+\subsection*{Outline}
+
+\begin{itemize}
+	\item Definition af Turing Maskine (TM) og Church-Turing tesen
+	\item Multitape TMs og bevis for disses ækvivalens med single tape TMs
+	\item Non-deterministiske TMs og bevis for disses ækvivalens med single tape TMs
+	\item Definition af Turing decidability og -recognizability
+	\item Eksempler på et decidable language med udgangspunkt i deres deciders
+\end{itemize}
+
+\subsection*{TMs og Church-Turing tesen}
+
+TMs er abstrakte modeller af en computer med et ubegrænset mængde hukommelse; god abstraktion over en computer som vi kender den. \textit{Church-Turing tesen} formaliserer dette: ``Enhver funktion, der er beregnelig kan beregnes af en TM''. \\
+
+En deterministisk single-tape TM $M$ er defineret som $M=(Q,\Sigma,\Gamma,\delta,q_0,q_{accept},q_{reject})$, hvor
+\begin{itemize}
+	\item $Q$: states
+	\item $\Sigma$: input-alfabet, hvor $\sqcup \notin \Sigma$) 
+	\item $\Gamma$: tape-alfabet, hvor $\sqcup \in \Gamma$ og $\Sigma \subseteq \Gamma$
+	\item  $\delta$: transitionsfunktion, $Q \times \Gamma \rightarrow Q \times \Gamma \times \{L,R\}$
+	\item $q_0$: start state
+	\item $q_{accept}$: accept state
+	\item $q_{reject}$: reject state (NB: $q_{accept} \ne q_{reject}$)
+\end{itemize} 
+En TM $M$ består af et læsehoved og et stykke tape (hukommelse) der strækker sig uendeligt til højre. Et input af længde $n$ skrives på de første $n$ pladser på tapen. Læsehovedet læser det første symbol og $\delta$ dikterer så (1) hvilken state $M$ skal skifte til, (2) hvilket symbol der skal skrives på tapen og (3) hvilken retning læsehovedet skal bevæge sig ét trin i. \\
+
+\subsection*{Multitape TMs.} 
+
+Mange afarter af TMs, fx en TM med et vilkårligt (men fixed) antal tapes. $\delta$ for en TM $M$ med $k$ tapes kan skrives som $\delta: Q \times \Gamma^k \rightarrow Q \times \Gamma^k \times \{L,R\}^k$. D.v.s. $M$ er stadig kun i ét state af gangen men arbejder simultant på $k$ tapes, der hver har ét læsehoveds. \\
+
+\textbf{Thm.} Enhver multitape TM har en ækvivalent single-tape TM.\\
+
+\textbf{Bevis.} Lad $M$ være en $k$-tape TM og lad $N$ være en 1-tape TM. Vi kan simulere $M$ på $N$ ved at gøre følgende på input $s=w_1w_2 \cdots w_n$:
+\begin{enumerate}
+	\item Formatér $N$ tape således: $\underline{\#}\stackrel{\bullet}{w_1}w_2\cdots w_n \#\stackrel{\bullet}{\sqcup}\# \cdots \#$. Prikkerne over symbolerne viser de virtuelle læsehoveders placering og understregningen viser det faktiske læsehoveds placering.
+	\item Scan inputtet fra det første $\#$ til det $(k+1)$ste (d.v.s. sidste) $\#$ for at bestemme tape-indholdet under de $k$ virtuelle læsehoveder. Scan inputtet fra det $(k+1)$ste $\#$ til det første $\#$ og opdater tape-indholdet og flyt de virtuelle læsehoveder i overensstemmelse med $\delta$ for $M$. 
+	\item Hvis et virtuelt læsehoved flyttes til venstre ud på et $\#$ behold det da på det forhenværende symbol; dette svarer til at læsehovedet forsøger at rykke ud over venstresiden af tapen. Hvis et virtuelt læsehoved flyttes til højre ud på et $\#$ så flyt da hele tapeindholdet fra og med det pågældende $\#$ én plads til højre (right shift) og indsæt et $\sqcup$ på den nye tomme plads, hvor det virtuelle læsehoved så placeres over; dette svarer til at læsehovedet rykker ud på den tomme del af tapen til højre som er uendelig.  
+\end{enumerate}
+\begin{flushright}
+	\qed
+\end{flushright}
+
+\subsection*{Non-deterministiske TMs}
+
+En non-deterministisk TM er en TM, hvor TMen i hvert trin af beregningen kan følge forskellige muligheder (ligesom en NFA). Derved opnås en træstruktur, hvor hver gren repræsenterer en mulig beregning for TMen. Altså har vi en transitionsfunktion 
+$$\delta: Q \times \Gamma \rightarrow \mathcal{P}(Q \times \Gamma \times \{L,R\})$$
+Hvis en gren ender i $q_{accept}$ så accepteres inputtet. \\
+
+\textbf{Thm.} Enhver non-deterministisk TM har en ækvivalent deterministiske TM. \\
+
+\textbf{Bevis.} Lad $N$ være en vilkårlig non-deterministisk TM. Lad $D$ være en 3-tape deterministisk TM (der eksisterer en ækvivalent 1-tape TM jf. Thm. vist ovenfor). Vi viser Thm. ved at vise at $N$ kan simuleres på $D$. \\
+
+Indholdet på $D$s tre tapes er:
+\begin{itemize}
+	\item Tape 1: Input strengen. Ændres aldrig.
+	\item Tape 2: Simulations-tape.
+	\item Tape 3: Adresse-tape.
+\end{itemize}  
+Vi betragter $N$s beregningstræ. Enhver node i dette træ kan have højest $b$ børn, hvor $b$ er det maksimale antal muligheder givet i $\delta$ for $N$. Enhver node får tildelt et navn over alfabetet $\Gamma_b=\{1,2,\ldots,b\}$. Fx så angiver adressen 231 at vi tager rodens 2. barn, denne nodes 3. barn og denne nodes 1. barn. Hvis en adresse ikke svarer til en node så ignoreres denne adresse og den næste adresse behandles. Så det vi faktisk laver svarer til BFS på $N$s beregningstræ.\footnote{Bemærk at DFS ikke egner sig her, da denne algoritme traverserer grenene én af gangen. Så hvis en gren er et uendeligt loop (og dermed uendelig lang) vil DFS aldrig blive færdig med at gennemløbe beregningstræet.} Beregningstræets rod har adressen $\varepsilon$. \\
+
+Vi kan nu beskrive hvad $D$ gør på input $\langle N, w \rangle$:
+\begin{enumerate}
+	\item Kopier indholdet af tape 1 til tape 2 og skriv $\varepsilon$ til tape 3. 
+	\item Simuler $N$ på indholdet af tape 2. Før hvert trin i $N$ konsulteres tape 3 for at vide, hvilket valg der skal tages ift. $N$s $\delta$. Hvis der på tape 3 læses et $\sqcup$ \textit{eller} hvis der ikke er noget valg for $\delta$ der svarer til adressen på tape 3 \textit{eller} hvis grenen ender i $q_{reject}$ \textit{så} gå til trin 3. Hvis grenen ender i $q_{accept}$ så accepter. 
+	\item Erstat strengen (tallet) på tape 3 med den næste streng (tal) i rækken og gentag trin 2 og 3. 
+\end{enumerate}
+\begin{flushright}
+	\qed
+\end{flushright}
+
+\subsection*{Turing recognizability og decidability}
+
+\textbf{Recognizable.} En sprog $L$ er Turing recognizable (genkendeligt) hvis der eksisterer en TM $M$ s.t. hvis $s \in L$ så accepteres $s$ af $M$. \\ 
+
+\textbf{Decidable.} Et sprog $L$ er Turing decidable (afgørligt), hvis der eksisterer en TM $M$ s.t. $M$ accepterer en $s$ hvis og kun hvis $s \in L$. (Bemærk at hvis et sprog er recognizable er det også decidable men ikke vice versa.)\\
+
+\subsubsection*{Eksempel 1} % Udelad eventuelt.
+
+Lad $A_{DFA} =\{\langle B,w \rangle| \; B \text{ er en DFA der accepterer input streng } w\}$. \\
+
+\textbf{Thm.} $A_{DFA}$ er decidable. \\
+
+\textbf{Bevis.} Vi beviser Thm. ved at give en konkret TM $M$ som decider $A_{DFA}$. \\
+
+Lad $M$ være en TM der på input $\langle B, w \rangle$ gør følgende: 
+\begin{enumerate}
+	\item Simuler $B$ v.h.a. $M$
+	\item Giv $w$ som input til $B$. Hvis $B$ ender i et accept state, så accept. Hvis $B$ ikke ender i et accept state så reject. 
+\end{enumerate}
+
+\subsubsection*{Eksempel 2}
+
+Vi vil konstruere en TM der beregner funktionen $f(w)=(ww)^{\mathcal{R}}$. \\
+
+Lad $M$ være en 2-tape TM der gør det følgende på input $w$: 
+\begin{enumerate}
+	\item Hvis det første symbol i $w$ er $\sqcup$ så er $w=\varepsilon$, så $M$ accepterer. Ellers fortsæt. 
+	\item Kopier $w$ til tape 2 ved at skrive symbolerne fra tape 1 ét af gangen indtil et $\sqcup$ læses på tape 1. 
+	\item Flyt tape 1s læsehoved til symbolet længst til venstre. Flyt tape 1s læsehoved til det første $\sqcup$ (d.v.s. én plads til højre).
+	\item Gentag trin 2 én gang. (Nu indeholder tape 2 $ww$).
+	\item Flyt tape 2s læsehoved til det første symbol $w_1$ og marker det så det bliver $\stackrel{\bullet}{w_1}$. 
+	\item Flyt tape 1s læsehoved til det første symbol til venstre. 
+	\item Flyt tape 2s læsehoved til det sidste symbol, d.v.s. det sidste non-$\sqcup$ symbol. (Dette er det sidste symbol i $ww$).
+	\item Skriv indholdet fra tape 2 til tape 1. Gør dette ved at skrive et symbol, hvorefter tape 2s læsehoved flyttes én til venstre og tape 1s læsehoved flyttes én til højre. Fortsæt indtil og med at $\stackrel{\bullet}{w_1}$ (uden bullet-tegnet) er skrevet til tape 1.
+	\item Flyt begge læsehoveder helt til venstre og accepter. 
+\end{enumerate}
+
+
+
+

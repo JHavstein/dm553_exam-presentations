@@ -1,0 +1,110 @@
+\section{Finite automata and regular languages}
+
+\subsection*{Outline}
+
+\begin{itemize}
+    \item Definition af finite automata (DFA/NFA)
+    \item Bevis-skitse over ækvivalens af DFAs og NFAs
+    \item Definition af regulære sprog og regular expressions
+    \item Eksempel på en regular expression med en ækvivalent DFA
+    \item Bevis for Pumping Lemmaet for regulære sprog
+    \item Eksempel på anvendelse af pumping lemmaet 
+\end{itemize}
+
+\subsection*{Finite automata (NFA/DFA)}
+
+\begin{itemize}
+    \item Abstrakt model af en computer med ekstremt begrænset hukommelse
+    \item Deterministisk finite automaton (DFA): 5-tuple $(Q,\Sigma,\delta,q_0,F)$, hvor
+    \begin{itemize}
+        \item $Q$: states 
+        \item $\Sigma$: alfabet 
+        \item $\delta$: transitionsfunktion, $\delta: \Sigma \rightarrow Q$
+        \item $q_0 \in Q$: start-state 
+        \item $F \subseteq Q$: accept-state 
+    \end{itemize}
+    \item Non-deterministisk finite automata (NFA): Somme som DFA pånær at $\delta: Q \times \Sigma_{\varepsilon} \rightarrow \mathcal{P}(Q)$ (d.v.s. når NFAen er i state $q \in Q$ og læser symbol $s \in \Sigma_{\varepsilon}$ kan NFAen lave en transition til multiple states).
+\end{itemize}
+\textbf{Thm.} NFAer og DFAer genkender den samme klasse af sprog. \\
+
+\textbf{Bevis-skitse.} Enhver DFA er en NFA fordi $\forall q \in Q: q \subseteq \mathcal{P}(Q)$ (d.v.s. $\delta$ for DFAer er også gyldig for en NFA). \\
+
+Enhver NFA har en ækvivalent DFA. Givet en NFA $N=(Q,\Sigma,\delta,q_0,F)$ kan vi konstruere en DFA $D=(Q', \Sigma, \delta',q_0',F')$, hvor $Q'=\mathcal{P}(Q)$, $q_0'=\{q_0\}$, $F'=\{R \in Q' | \; R \text{ indeholder en accept-state } N\}$. Da $Q'=\mathcal{P}(Q)$ kan vi nemt gøre $\delta'$ ækvivalent med $\delta$ ved for en given state og symbol $(q,r) \in Q \times \Sigma_{\varepsilon}$ at holde styr på, hvor $\delta$ kan lave transitioner til. Dette vil være $Q'' \subseteq \mathcal{P}(Q)$ så vi designer $\delta'$ således at denne reflekterer dette. \\
+
+Når der er $\varepsilon$-transitioner i $N$ er der lidt flere trin forbundet med at konstruere $q_0'$, $\delta'$, og $F'$ men ækvivalensen holder stadig.
+\begin{flushright}
+    \qed 
+\end{flushright}
+
+\subsection*{Regular sprog og regular expressions}
+
+\begin{itemize}
+    \item Lad $L$ være et sprog. Så gælder: 
+    \begin{itemize}
+    	\item $L$ er regulært $\Leftrightarrow$ $L$ genkendes af en DFA.
+    	\item $L$ er regulært $\Leftrightarrow$ $\exists$ en regular expression, der beskriver $L$
+    \end{itemize}
+    
+    \item $R$ er en regular expression hvis $R$ er:
+    \begin{itemize}
+        \item $a$, for et $a \in \Sigma$,
+        \item $\emptyset$ (det tomme sprog),
+        \item $\varepsilon$ (sproget indeholdende den tomme streng), 
+        \item $(R_1 \cup R_2)$ ($R_1,R_2$: regular expressions),
+        \item $(R_1 \circ R_2)$ ($R_1,R_2$: regular expressions), eller 
+        \item $(R_1^*)$ ($R_1$: regular expression)
+    \end{itemize}
+\end{itemize}
+
+\textbf{Eksempel.} Lad $R=((ba \cup ab)^*b)$. $R$ er en regular expression og derfor er $((ba \cup ab)^*b)$ et regulært sprog. Den følgende DFA $D=(\{q_1,q_2,q_3,q_4\},\{a,b\},\delta,q_1,\{q_4\})$ har $L(D)=R$:
+\begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+    \node[state,initial] (1) {$q_1$};
+    \node[state] (2) [right=of 1] {$q_2$};
+    \node[state] (3) [above=of 1] {$q_3$};
+    \node[state,accepting] (4) [below=of 1] {$q_4$};
+    \path[->]
+        (1) edge [bend left=15] node {$b$} (2)
+            edge [bend left=15] node {$a$} (3)
+            edge node {$b$} (4)
+        (2) edge [bend left=15] node {$a$} (1)
+        (3) edge [bend left=15] node {$b$} (1);
+    \end{tikzpicture}
+\end{center}
+
+\subsection*{Pumping lemma for regulære sprog}
+
+Pumping lemmaet kan benyttes til at bevise at et sprog \textit{ikke} er regulært. \\
+
+\textbf{Thm.} Hvis $A$ er et regulært sprog så $\exists p$ (pumpe-længde) s.t. hvis $s \in A$ og $|s|\ge p$ så kan $s$ deles op i tre dele $s=xyz$ således at $s$ tilfredsstiller:
+\begin{enumerate}
+    \item $\forall i \ge 0: xy^i z \in A$
+    \item $|y|>0$
+    \item $|xy| \le p$
+\end{enumerate}
+
+\textbf{Bevis.} Lad $M=(Q, \Sigma, \delta, q_0, F)$ være en DFA med $L(M)=A$ og lad pumpe-længden $p=|Q|$. Vi vælger en vilkårlig streng $s \in A$, hvor $|s|=n\ge p$. Når $M$ læser $s$ vil der altså være $n$ præcis $n$ state-transitions og derfor vil sekvensen af states som $M$ befinder sig i mens $s$ læses have længde $n+1$ (pga. vi er i state $q_0$ før det første symbol i $s$ læses). Da $|Q| = n$ følger det af pigeonhole princippet at $\exists q \in Q$ s.t. $q$ besøges mindst to gange i løbet af læsningen af $s$. Illustration:    
+\begin{center}
+	\includegraphics[width=0.65\textwidth]{pumpingLemma.JPG}
+\end{center}
+Som det kan ses på tegningen, kan vi skrive $s=xyz$, hvor $x$ er den del af $s$ som er indtil den state som gentages; $y$ er den del mellem states der gentages; $z$ er den del efter gentagelsen. \\
+
+Opfyldelse af betingelserne: 
+\begin{enumerate}
+	\item Det er åbenlyst fra illustrationen at `løkken' fra og til den gentagne state kan gennenmløbes et vilkårligt antal gange (inkl. 0 gange). 
+	\item $|y|>0$ fordi `løkken' angiver en sekvens, der finder sted mellem to \textit{forskellige} forekomster af den gentagne state. (Bemærk at $|y|>0$ også gælder hvis sekvensen er er $\ldots q_9q_9 \ldots$, altså et self-loop uden mellemliggende states). 
+	\item Følger af pigeonhole princippet fordi de første $p+1$ states må indeholde en gentagen state da $p=|Q|$.    
+\end{enumerate} 
+\begin{flushright}
+	\qed
+\end{flushright}
+
+\subsection*{Eksempel: Anveldelse af pumping lemmaet}
+
+Vi vil vise at $L=\{a^{k^{2}}| \; k \ge 0\}$ ikke er regulært v.h.a. pumping lemmaet. \\
+
+Antag til modstrid at $L$ er regulært. Lad $p$ være pumpe-længden. Vælg $s=a^{p^{2}} \in L$. Da $|s|=p^2 \ge p$ kan vi skrive $s=xyz$. Men hvis vi betragter $s'=xy^2z$ ser vi at $|s'| \le p^2 + p < p^2+2p+1=(p+1)^2$. Den første ulighed holder fordi $|y| \le p$. Det følger at $s' \notin L$, hvilket er en modstrid, der viser at $L$ ikke er regulært. 
+\begin{flushright}
+	\qed
+\end{flushright}    
+

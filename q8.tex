@@ -1,0 +1,111 @@
+\section{Information-theoretic lower bounds and adversary lower bounds for sorting by comparisons}
+
+\section*{Outline}
+\begin{itemize}
+	\item Introduktion til information-theoretic lower bounds.
+	\item Eksempel: En information-theoretic lower bound for average behavior for sammenligningsbaseret sortering
+\end{itemize}
+
+\subsection*{Information-theoretic lower bounds}
+
+\textbf{Information-theoretic lower bounds.} Når vi finder information-theoretic lower bounds bruger vi beslutningstræer til at ræsonnere fx omkring antal sammenligninger i worst case som en vilkårlig sammenligningsbaseret algoritme foretager. 
+
+\subsection*{Information-theoretic lower bound for average behavior for sammenligningsbaseret sortering}
+
+Vi vil nu bevise en $\Omega(n \cdot \log n)$ lower bound på average case for sammenligningsbaseret sortering vha. 3 lemmaer. \\
+
+Lad $n \in \N$ være fixed og lad $x_1,x_2,\ldots,x_n$ være unikke tal, der skal sorteres. Vi konstruerer et binært decision tree, der afspejler sekvensen af sammenligninger af $x_1,\ldots,x_n$. Et træ med $n=3$ vil se ud på følgende måde:
+
+\begin{center}
+	\includegraphics[width=0.65\textwidth]{decisionTree.PNG}
+\end{center}
+Indre noder angiver sammenligninger hvor det største tal ryger til højre og det mindste til venstre. Hvert blad er en permutation af $\{x_1,\ldots,x_n\}$. Der er præcis $n!$ blade fordi dette er antallet af permutationer af $n$ unikke tal. \\
+
+Vi kan bruge dette decision tree til følgende: 
+\begin{enumerate}
+	\item Den længste rod-blad sti (træets højde) er worst case på antallet af sammenligninger.
+	\item Den gennemsnitlige længde af rod-blad stierne er average case på antallet af sammenligninger. 
+\end{enumerate}
+Vi fokuserer på 2. \\
+
+Lad $epl$ (external path length) være
+\begin{align*}
+	epl=\sum_{\text{alle rod-blad stier s}} (\text{længden af s})
+\end{align*}
+
+\textbf{Lemma 1.} Blandt binære decision trees med $l$ blade gælder: Alle $l$ blade er i højest 2 tilødende lag $\Rightarrow$ $epl$ er minimeret. \\
+
+\textbf{Bevis.} Antag at vi har et binært træ med højde $d$ med et blad $X$ i niveau $k\le d-2$. Antag desuden at der er en indre knude $Y$ på niveau $d-1$ med 2 børn, der er blade (altså på niveau $d$). Vi flytter de to børn fra $Y$ og sætter dem på som børn til $X$: 
+
+\begin{center}
+	\includegraphics[width=0.65\textwidth]{decisionTree2.PNG}
+\end{center}
+
+Vi viser nu at dette giver et netto-fald i $epl$: \\
+
+$epl$ falder med 
+\begin{align*}
+	2d+k
+\end{align*}
+fordi de to stier til $Y$s tidligere børn ikke længere er der og $k$ fordi $X$ nu har to børn, hvorfor dens sti ikke tælles med i $epl$. \\
+
+$epl$ stiger med
+\begin{align*}
+	\overbrace{2(k+1)}^{\text{stier til X's børn}}+\overbrace{d-1}^{\text{stien til Y}} =& 2k+2+d-1 \\
+	=& 2k+d+1 
+\end{align*}
+
+Så netto-fald i $epl$ er: 
+\begin{align*}
+	2d+k-( 2k+d+1) =& 2d+k-2k-d-1 \\
+	=& d-k-1
+\end{align*}
+og $d-k-1>0$ da $k\ge d-2$. \\
+
+Det følger at dette at vi altid kan reducere $epl$ ved at gøre dette. Men når vi når til at alle blade er på to tilstødende niveauer vil vi ikke længere kunne reducere $epl$ (vi kan ikke rykke nogle blade højere op -- kun rykke rundt på dem i samme niveau), hvilket konkluderer beviset. 
+\begin{flushright}
+	\qed
+\end{flushright}
+
+\textbf{Lemma 2.} Den mindst mulige $epl$ for et binært træ med $l$ blade er $l \lfloor \log l \rfloor + 2(l-2^{\lfloor \log l \rfloor})$. \\
+
+\textbf{Bevis.} \textit{Hvis $l=2^k$ for et $k \in \N$:} Da vil alle bladene være i lag $\log l$, så i dette tilfælde er $epl=l \cdot \log l$. Dette passer med lemmaet fordi:
+\begin{align*}
+	l \cdot \lfloor \log l \rfloor + 2(l-2^{\lfloor \log l \rfloor}) =& 2^k \cdot \log 2^k + 2(2^k-2^{\log 2^k}) && (\text{Da } l=2^k \text{ og } 2^k \text{ altid lige}) \\
+	=&2^k \cdot \log 2^k +2(2^k-2^k) \\
+	=&2^k \cdot \log 2^k \\
+	=& l \cdot \log l
+\end{align*}
+
+\textit{Hvis $l$ ikke er en potens af 2:} Så er dybden af træet $d=\lceil \log l \rceil$ og alle blade er på niveau $d-1$ og $d$. Hvis vi siger at alle blade er i niveau $d-1$ så er $epl=l(d-1)$. Men der er også nogle blade i niveau $d$, så for hvert af disse skal der lægges 1 til for at få den totale $epl$. Det totale antal blade i niveau $d$ er 
+\begin{align*}
+	2(l-2^{d-1})
+\end{align*}
+fordi der for hver node i level $d-1$ der \textit{ikke} er et blad vil være to blade i level $d$ (denne to børn) -- altså $l-2^{d-1}$ er antallet af ikke-blade i level $d-1$ og vi ganger med 2 pga. denne vil have 2 børn. Det giver en total $epl$ på:
+\begin{align*}
+	epl =& l(d-1) + 2(l-2^{d-1}) \\
+	=& l \cdot \lfloor \log l \rfloor + 2(l-2^{\lfloor \log l \rfloor})
+\end{align*}
+Da $d-1=\lfloor \log l \rfloor$ fordi $d=\lceil \log l \rceil$. 
+\begin{flushright}
+	\qed
+\end{flushright}
+
+\textbf{Lemma 3.} Den gennemsnitlige rod-blad sti-længde i et binært træ med $l$ blade er $\ge \lfloor \log l \rfloor$. \\
+
+\textbf{Bevis.} Den mindste gennemsnitlige bladlængde (d.v.s lower bound på gennemsnittet) får vi vha. Lemma 2:
+\begin{align*}
+	\frac{l \cdot \lfloor \log l \rfloor + 2(l-2^{\lfloor \log l \rfloor})}{l} =& \lfloor \log l \rfloor + \varepsilon
+\end{align*}
+hvor $0 \le \varepsilon < 1$ da $l-2^{\lfloor \log l \rfloor}<1/2$ pga. floor-division ($\lfloor \log l \rfloor$ -- uden floor-division ville det altid give 0). 
+\begin{flushright}
+	\qed
+\end{flushright} 
+
+Det følger af Lemma 3 at lower bound på average case for sammenligningsbaseret sortering af $n$ unikke tal er $\lfloor \log n! \rfloor$ (da der er $n!$ blade i et binært beslutningstræ for sammenligningsbaseret sortering). Vi har at $\Omega(\log n!)=\Omega(n \cdot \log n)$, hvilket beviser den føromtalte lower bound på average case for sammenligningsbaseret algoritme. \\
+
+\textit{Praktisk implikation: } Ingen sammenligningsbaseret sorteringsalgoritme kan gøre det bedre (asymptotisk set) i gennemsnittet end algoritmer med average case køretid på $O(n \cdot \log n)$ såsom Quicksort og Mergesort.  
+
+
+
+

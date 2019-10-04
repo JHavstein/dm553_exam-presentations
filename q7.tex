@@ -1,0 +1,92 @@
+\section{Proof that $SATISFIABILITY$ is NP-complete (Cook-Levin Theorem)}
+
+\subsection*{Bevis af Cook-Levin teoremet}
+
+\textbf{SAT-problemet:.} Et instance af SAT er en boolsk formel $\phi$ med $n$ boolske variabler $x_1,\ldots,x_n$, $m$ boolske konnektiver (fx $\wedge$, $\vee$, $\ne$ etc.) samt parenteser. Hvis der eksisterer en truth assignment af $x_1,\ldots, x_n$ s.t. hele $\phi$ er sand, så er $\phi$ satisfiable, ellers er den ikke-satisfiable. Så $SAT=\{\langle \phi \rangle | \; \phi \text{ er satisfiable}\}$. \\
+
+\textbf{Thm.} SAT $\in NPC$. \\
+
+\textbf{Bevis.} Viser at $SAT \in NP$: \\
+
+Givet er et instance af SAT og et certifikat $c$ som består af en truth assignment til alle boolske variabler i $\phi$. Gennemløb $\phi$ og tjek om denne evaluerer til TRUE givet $c$. Dette kan gøres i lineær tid i antallet af boolske variabler så $SAT \in NP$. \\
+
+Viser at $\forall A \in NP: (A \le_p SAT)$, d.v.s. at SAT er NP-hard: \\
+
+Vælg et arbitrært $A \in NP$ og lad $N$ være en non-deterministisk TM der decider $A$ i tid $n^k$ for et $k \in \Z^+$. For en inputstring $w$ til $N$ kan vi lavet et \textit{tableau} som er en $n^k \times n^k$ tabel ($n = |w|$), der svarer til en beregningsgren i beregningstræet for $N$ og viser alle grenens konfigurationer (husk $N$ er decider så ingen uendelige loops). I tableauet starter hver række med et $\#$-symbol og hver række følger den umiddelbart forudgående ifølge $\delta$. Et tableau er \textit{accepting} hvis det indeholder en række i en accept-konfiguration (altså hvis rækken er i $q_{accept}$). Så: $N$ accepts $w$ $\Longleftrightarrow$ $\exists$ accepting tableau for $N$ på $w$. Et tableau ser således ud: 
+
+\begin{center}
+	\includegraphics[width=0.60\textwidth]{tableau.PNG}
+\end{center}
+
+\textit{Polynomial-time reduktionen:} Vi ønsker at reducere $A$ til SAT i polynomiel tid. På input $w$ producerer reduktionen en boolsk formel $\phi$ s.t. en satisfying truth assignment svarer til et accepting tableau for $N$ på $w$. \\
+
+Cellerne i et tableau kaldes $[i,j]$ for $i,j \in \{1,\ldots,n^k\}$. Lad $C=Q \cup \Gamma \cup \{\#\}$. For hver $i,j \in \{1,\ldots n^k\}$ og for hvert $s \in C$ har vi en boolsk variabel $x_{i,j,s}$. Det gælder at $x_{i,j,s} = 1 \Longleftrightarrow$ celle $[i,j]$ indeholder $s$ (d.v.s. $s$ er ``tændt'' i celle $[i,j]$). \\
+
+Nu designer vi $\phi$ s.t. en satisfying truth assignment svarer til et accepting tableau for $N$ på $w$: Vi lader 
+\begin{align*}
+	\phi = \phi_{cell} \wedge \phi_{start} \wedge \phi_{accept} \wedge \phi_{move}
+\end{align*}  
+$\phi_{cell}$: Da vi skal have en korrespondance mellem en truth assignment og vores tableau skal hver celle i tableauet indeholde præcis én variabel, der er tændt: 
+\begin{align*}
+	\phi_{cell} = \bigwedge_{1 \le i, j \le n^k} \bigg[\bigg(\bigvee_{s \in C} x_{i,j,s} \bigg) \wedge \bigg(\bigwedge_{s,t \in C,\, s\ne t} (\overline{x_{i,j,s}} \vee \overline{x_{i,j,t}} \bigg) \bigg]
+\end{align*}
+
+$\phi_{start}$: Dette er første række i tableauet, svarende for start-konfigurationen af $N$ på $w$:
+\begin{align*}
+	q_{start} = x_{1,1,\#} \wedge x_{1,2,q_0} \wedge x_{1,3,w_1} \wedge x_{1,4,w_2} \wedge \cdots \wedge x_{1,n^k-1,\sqcup} \wedge x_{1,n^k,\#}
+\end{align*}
+
+$\phi_{accept}$: Denne bruges til at garantere at der forekommer en accepting konfiguration i tableauet (altså at $q_{accept}$ er at finde i en celle):
+\begin{align*}
+	\phi_{accept} = \bigvee_{1 \le i, j \le n^k} x_{i,j,q_{accept}} 
+\end{align*}
+
+$\phi_{move}$: Denne sikrer at enhver række i et tableau lovligt følger den forrige række ifølge $N$s $\delta$. Det er her ``windows'' kommer ind, hvilket vi nu vil gribe fat på. \\
+
+\textit{Windows:} Et window er et $2 \times 3$ udsnit af tableauet. Et window er lagal, hvis de nederste 3 celler lovligt kan resultere fra de øverste 3 celler. Eksempler på lovlige vinduer givet $\delta(q_1,a)=\{(q_1,b,R)\}$ og $\delta(q_1,b)=\{(q_2,c,L),(q_2,a,R)\}$: 
+\begin{center}
+	\includegraphics[width=0.75\textwidth]{legalWindows.PNG}
+\end{center}
+og eksempler på ulovlige vinduer givet samme $\delta$:
+\begin{center}
+	\includegraphics[width=0.75\textwidth]{illegalWindows.PNG}
+\end{center}
+
+\textbf{Påstand.} Hvis den øverste række i et tableau er start-konfigurationen og hvert window i tableauet er legal, så er hver række i tableauet en lovlig efterfølger til rækken før ifølge $N$s $\delta$. \\
+
+\textbf{Bevis.} Vi betragter to vilkårlige rækker, der ligger ved siden af hinanden, hhv. en øvre- og en nedre række. I den øvre række er hver celle der indeholder et symbol $m \notin Q$ og som heller ikke ligger ved siden af et symbol $n \in Q$, den øverste celle i midten i et window (fordi første og sidste celle i alle rækker er $\#$), Dette symbol vil altså være uforandret i den nedre række og derfor forekomme i den nederste celle i midten i samme window. \\
+
+Det ene window, der indeholder et state-symbol $q \in Q$ i den øverste, midterste celle garanterer at de tre celler opdateres lovligt ifølge $\delta$. Så de nederste tre celler i det pågældende window er legal. Det følger at hvis den øvre rækkes konfiguration er legal så vil den nedre rækkes konfiguration også være legal. Derved følger den nedre konfiguration af den øvre konfiguration ifølge $\delta$ for $N$. Dermed er påstanden bevist. \\
+
+Tilbage til $\phi_{move}$: Lad $(i,j)$-window være det window med celle $[i,j]$ øverst i midten. Betegn desuden cellerne i et window som:
+\begin{center}
+	\begin{tabular}{|c|c|c|}\hline
+		$a_1$ & $a_2$ & $a_3$ \\ \hline 
+		$a_4$ & $a_5$ & $a_6$ \\ \hline 
+	\end{tabular}
+\end{center}
+Da kan vi skrive
+\begin{align*}
+	\phi_{move}=&\bigwedge_{i\le i < n^k, \, 1<j<n^k} (\text{det } (i,j)\text{te window er legal}) \\
+	=&\bigwedge_{i\le i < n^k, \, 1<j<n^k} \bigg[\bigvee_{a_1 \ldots a_6 \text{ is a legal window}} (x_{i,j-1,a_1} \wedge x_{i,j,a_2} \wedge x_{i,j+1,a_3} \wedge x_{i+1,j-1,a_4} \wedge x_{i+1,j,a_5} \wedge x_{i+1,j+1,a_6}) \bigg]
+\end{align*}  
+(d.v.s. en OR over alle de mulige lovlige windows $a_1,\ldots,a_6$ -- OR indebærer at $\phi_{move}$ er et af de mulige lovlige vinduer.)\\
+
+Nu har vi en færdig boolsk formel $\phi$ fordi vi har specificeret både $q_{start}$, $q_{cell}$, $q_{accept}$ og $q_{move}$. Dermed har vi en færdig reduktion af $A$ til SAT, da $\phi$ er satisfiable $\Leftrightarrow$ $\exists$ accepting tableau for $N$ på $w$! Nu mangler vi blot at vise at reduktionen tager polynomiel tid i $|N|$ og $|w|$ at udføre: \\
+
+Et $n^k \times n^k$ tableau har $n^k \cdot n^k = n^{2k}$ celler. Så antallet af variabler er $n^{2k} \cdot |C|=O(n^{2k})$ fordi der er $C$ variabler (hvoraf præcis én er tændt i hver celle jf. $\phi_{cell}$) per celle. Derudover har vi:
+\begin{itemize}
+	\item $|\phi_{start}|=O(n^k)$, da dette kun er første række i tableauet.
+	\item $|\phi_{accept}|=O(n^{2k})$, da dette er et OR mellem alle celler i tableauet. 
+	\item $|\phi_{cell}|=O(n^{2k})$, da dette kun afhænger af $|C|$ (husk tilbage på formlen for $\phi_{cell}$) og $|C|$ afhænger kun af $|N|$ (husk tilbage på definitionen af $C$), hvilket er konstant.
+	\item $|\phi_{move}|=O(n^{2k})$, da antallet af legal celler kun afhænger af $N$s $\delta$
+\end{itemize}  
+Desuden har vi en faktor $O(\log n)$ da vores indexer er fra $1\ldots2^k$, hvilket kræver logaritmisk tid at skrive ind i $\phi$. \\
+
+Så alt i alt tager reduktionen $O(n^{2k} \cdot \log n)$ tid.
+\begin{flushright}
+	\qed
+\end{flushright}
+
+
+

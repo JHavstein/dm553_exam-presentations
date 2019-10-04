@@ -1,0 +1,124 @@
+\section{Reducibility (including mapping reductions and polynomial reductions}
+
+\subsection*{Outline}
+
+\begin{itemize}
+	\item Mapping reductions og polynomial time reductions, definitioner og formål
+	\item NP-completeness definition og relation til polynomial time reductions
+	\item Eksempler på polynomial time reductions til at vise at problem er NP-complete
+\end{itemize}
+
+\subsection*{Mapping reductions og polynomial time reductions}
+
+\textbf{Mapping reductions.} Lad $A$ og $B$ være sprog. $A \le_m B$ hvis $\exists$ en beregnelig funktion $f: \Sigma^* \rightarrow \Sigma^*$, hvor $\forall w: (w \in A \Longleftrightarrow f(w) \in B)$. Vi kalder $f$ reduktionen fra $A$ til $B$. \\
+
+\textit{Formål:} Bevise (un-)decidability. Hvis $A \le_m B$ og $B$ er decidable, så er $A$ decidable. Og hvis $A \le_m B$ og $A$ er undecidable, så er $B$ undecidable. \\
+
+\textbf{Polynomial time reductions.} Lad $A$ og $B$ være sprog. $A \le_p B$ hvis $\exists$ en funktion $f: \Sigma^* \rightarrow \Sigma^*$ der kan beregnes i polynomiel tid, hvor $\forall w: (w \in A \Longleftrightarrow f(w) \in B)$. Vi kalder $f$ polynomial-time reduktionen fra $A$ til $B$. \\
+
+\textit{Formål:} Essentielt værktøj til at vise at et problem er NP-complete (NPC). Hvis $B \in NPC \wedge B \le_p C \wedge C \in NP \Longrightarrow C \in NPC$.
+
+
+\subsection*{NP-completeness og polynomial time reductions: HAMCYCLE}
+
+Som et eksempel på en polynomial time reduction vil jeg nu vise, at hamiltonian cycle er NP-complete vha. en polynomial time reduction. \\
+
+\textbf{Definition af NP-complete.} $A \in NP \wedge \forall B \in NP: (B \le_p A) \Longrightarrow A \in NPC$. \\
+
+\textbf{Hamiltonian Cycle problemet (HAMCYCLE):} Lad $G=(V,E)$ være en uorienteret graf. $G$ indeholder en HAMYCYCLE iff. $\exists$ en simple cycle\footnote{Cycle hvor kun én vertex gentages; alle andre vertices indgår præcis én gang.} i $G$ der indeholder alle $v \in V$. \\
+
+\textbf{Thm.} HAMCYCLE $\in NPC$. \\
+
+\textbf{Bevis.} Til beviset skal vi bruge VERTEX-COVER\footnote{Et vertex cover er en mængde af vertices i en uorienteret graf s.t. alle edges er incidente til mindst én vertex i vertex coveret.} $\in NP$. \\
+
+Først viser vi at HAMCYCLE $\in NP$. Et certifikat $c$ er en sekvens af $|V|$ vertices i $G$. Vi tjekker (1) at $c$ indeholder alle $v \in V$, (2) at sekvensen former en cycle og (3) at cyclen er en simple cycle. Dette kan åbenlyst gøres i polynomiel tid så HAMCYCLE $\in NP$. \\
+
+Nu viser vi VERTEX-COVER $\le_p$ HAMCYCLE. \\
+
+ uorienteret graf $G=(V,E)$ og et $k \in \Z^+$ (størrelse af vertex cover) konstruerer vi en graf $G'=(V',E')$, der har en HAMCYCLE iff. $G$ har et VERTEX-COVER af størrelse $k$. \\
+
+For at konstruere $G$ bruger vi en widget -- mere præcist vil $G'$ indeholde præcis én widget for hver edge $(u,v) \in E$. (a) viser en widgets opbygning og navngivning af de 12 vertices heri. (b)-(d) viser de eneste tre mulige måder at traversere de 14 edges i en widget på:
+\begin{center}
+	\includegraphics[width=\textwidth]{widget.PNG}
+\end{center}
+Desuden inkluderer vi $k$ selector-vertices, hvor $k$ er størrelsen på $G$s VERTEX-COVER. For at konstruere $G'$ fra $G$ vha. widgets gøres følgende to trin:
+\begin{enumerate}
+	\item For alle vertices $v \in V$ laves der en arbitrær ordning af de tilstødende knuder. Hvis vi har en knude $w$ og den er indident til $(x,y,z)$ så tilføjes kanterne $([w,x,6],[w,y,1])$ og $([w,y,6],[w,z,1])$.
+	\begin{enumerate}
+		\item Intuitionen bag disse edges er at hvis vi vælger en $v \in V$, der er del af $G$s VERTEX-COVER, så vil vi kunne lave en sti i $G'$ der dækker (covers) alle de widgets der repræsenterer edges, der er incidente til $v$.
+	\end{enumerate} 
+	\item De to endeknuder i stierne fra trin 1 forbindes til alle selector vertices. Bemærk at hvis en sti fx ender i $[u,v,6|$ er det den modsatte side af ``pinden'', altså $[u,v,1]$, der skal forbindes til selector-verticen (og vice versa hvis stien ender i $[u,v,1]$).  
+\end{enumerate}
+Nedenstående er et simpelt eksempel, hvor $G'$ konstrueres ud fra $G$. Lad $G$ være ($x$ og $y$ er markeret fordi disse udgør $G$s VERTEX-COVER): 
+\begin{center}
+	\includegraphics[width=0.50\textwidth]{graph1.JPG}
+\end{center}
+Der er tre edges i $G$ og to knuder i $G$s vertex cover så skelettet til $G'$ vil se sådan ud: 
+\begin{center}
+	\includegraphics[width=0.75\textwidth]{widget1.JPG}
+\end{center}
+Vi beslutter os for at ordne nabo-vertices til alle vertices i $G$ således (arbitrært):
+\begin{align*}
+	&\text{adj}(x)=(y,z) \\	
+	&\text{adj}(y)=(x,z) \\
+	&\text{adj}(z)=(x,y)
+\end{align*}
+Derfor tegner vi nu de følgende tre stier (sorte kanter): 
+\begin{center}
+	\includegraphics[width=0.80\textwidth]{widget2.JPG}
+\end{center}
+Nu forbinder vi sti-enderne til selector-vertices $S_1$ og $S_2$ (blå kanter) og får den færdige $G'$: 
+\begin{center}
+	\includegraphics[width=0.80\textwidth]{widget3.JPG}
+\end{center}
+Nu viser vi at $G'$ er polynomiel i størrelsen af $G$. Bagefter viser vi at det er en gyldig reduktion fra VERTEX-COVER til HAMCYCLE. Altså alt i alt at ovenstående er en polynomial time reduction! \\
+
+Følgende gælder for $|V'|$:
+\begin{align*}
+	|V| =& 12|E| + k && \text{(Fordi der er 12 vertices pr. widget)} \\
+	\le& 12|E| + |V|  && (\text{Fordi } k \le |V| \text{ da det er størrelsen af et vertex cover})
+\end{align*}
+Følgende gælder for $|E'|$: For det første har hver widget $14|E|$ edges. Desuden er der følgende antal edges mellem widgets:
+\begin{align*}	
+	\sum_{u \in V} (\text{degree}(u)-1) = 2|E|-|V| && \text{(Følger af handshake thm.)} 
+\end{align*}
+Endelig har $G'$ 2 edges for hvert par af en $v \in V$ og en selector-vertex, d.v.s. $2k|V|$ edges. Dette skyldes at de stier, der blev konstrueret (og som hver har to edges til hver selector vertex) kan ses som en \textit{vertex} i $G$.\footnote{Intuitive giver det god mening, men er ikke 100p skarp på, hvorfor det er tilfældet.} Dette givet alt i alt: 
+\begin{align*}
+	|E'| =& 14|E|+(2|E|-|V|)+(2k|V|) \\
+	=& 16|E|+2k|V|-|V| \\
+	=& 16|E|+2(k-1)|V| \\
+	\le& 16|E|+(2|V|-1)|V| 
+\end{align*}
+Så både $G'$ er polynomiel i størrelsen af $G$ da $|V'|$ og $|E'|$ er polynomielle i størrelserne af $|V|$ og $|E|$. \\
+
+Nu mangler vi kun at vise, at ovenstående er en gyldig reduktion af VERTEX-COVER til HAMCYCLE. \\
+
+\textit{Viser:} $G$ har VERETEX-COVER af størrelse $k$ $\Longrightarrow$ $G'$ har en HAMCYCLE. \\
+
+Antag at $G$ har et VERTEX-COVER $V^* \subseteq V$ af størrelse $k$ og at $V^*=\{u_1,\ldots,u_k\}$. I $G'$ markeres følgende edges: \footnote{Bemærk at vi følger CLRS og betragter en HAMCYCLE som bestående af edges, selvom en HAMCYCLE teoretisk set består af vertices}
+\begin{enumerate}
+	\item Start i $S_1$ og besøg første $u_1$. 
+	\item Besøg fra $u_1$ alle widgets, der svarer til edges, der er indidente til $u_1$. 
+	\item Gentag trin 1-2 for $u_2,\ldots,u_k$ og slut tilbage i $S_1$. 
+	\item Tegn edges inde i widgets'ne.  
+\end{enumerate} 
+Dette resulterer i en HAMCYCLE i vores eksempel (blå bølger på edges i HAMCYCLE):
+\begin{center}
+	\includegraphics[width=0.75\textwidth]{widget4}
+\end{center}
+Da $V^*$ er et VERTEX-COVER for $G$ er hver edge $e \in E$ incident til en $v \in V^*$. Derfor besøger cyclen hver widget i $G'$. Cyclen besøger også hver selector vertex, samt $S_1$ 2 gange, så det er en HAMCYCLE. \\
+
+\textit{Viser:} $G'$ har HAMCYCLE $\Longrightarrow$ $G$ har et VERTEX-COVER. \\
+
+Antag at $G'$ har en HAMCYCLE $C \subseteq E'$. Vi kan indse at $G$ må indeholde et VERTEX-COVER ved at betragte følgende gennemløb af $G'$:
+\begin{enumerate}
+	\item Start i $S_1$ og lav et maximal path gennemløb (d.v.s. længste mulige gennemløb), hvor der ikke indgår en anden selector vertex $S_j$. Stop når en anden selector vertex nås. Dette kalder vi en ``cover path'' 
+	\begin{enumerate}
+		\item På tegningen er der en markeret kant fra $S_1$ til $[x,y,1]$, hvorfor $x$ er i $G$s VERTEX-cover da man med denne fremgangsmåde dækker (coverse) alle kanter som er incidente til $x$ i $G$.
+	\end{enumerate} 
+	\item Lav tilsvarende cover paths for alle andre selector vertices. Dette giver samme konklusion som i (a) bare for andre $v \in V$.  
+\end{enumerate}
+Alle widgets indgår i mindst én og højst to cover path jf. antagelsen om at $G'$ har en HAMCYCLE. Hvis en widget indgår i præcis én cover path (som det er tilfældet for $W_{xz}$ og $W_{yz}$ i det anvendte eksempel) så er den tilsvarende edge i $G$ dækket (covered) at den $v \in V$, hvis cover path det er. Hvis en widget indgår i to cover paths (som det er tilfældet for $W_{xy}$ i det anvendte eksempel) så er den tilsvarende edge i $G$ dækket af de to $u,v\in V$, hvis cover paths det er. 
+\begin{flushright}
+	\qed
+\end{flushright}

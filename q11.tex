@@ -1,0 +1,102 @@
+\section{Aproximation algorithms}
+
+\subsection*{Outline}
+
+\begin{itemize}
+	\item Approximation algorithms -- definition og anvendelse.
+	\item Eksempel: Approximations-algoritme for set-covering problemet
+\end{itemize}
+
+\subsection*{Approximation algorithms}
+\textbf{Approximation algoritme.} En algoritme, der returnerer et nær-optimalt resultat, d.v.s. et resultat der er indenfor en kendt approximations-ratio $\rho(n)$. \\
+
+\textit{Approximation ratio.} Lad $\mathcal{A}$ være en algoritme til at løse problem $P$. Lad input-størrelsen være $n$. Lad $C^*$ være størrelsen på den optimale løsning til $P$ og lad $C$ være størrelsen på den løsning $\mathcal{A}$ finder til $P$. Vi siger at $\mathcal{A}$ er en $\rho(n)$ approximations-algoritme, hvis 
+\begin{align*}
+	\max \bigg( \frac{C}{C^*}, \frac{C^*}{C} \bigg) \le \rho(n)
+\end{align*}
+$\rho(n)$ kaldes $\mathcal{A}$s approximation-ratio. \\
+
+\textbf{Anvendelse:} Oftest bedste løsning for problemer $\in NPC$. Fordi hvis man vil finde en polynomiel algoritme til et problem $\in NPC$ bliver det nødt til at være en approximations algoritme (hvis vi antager at $P \ne NP$). 
+
+\subsection*{Eksempel: Approximation algorithm for set-covering problemet}
+
+\textbf{Set-covering problemet.} Et instance består af: 
+\begin{itemize}
+	\item Endelig mængde $X$
+	\item Familie $\mathcal{F}$ af delmængder af $X$ s.t. $X=\bigcup_{S \in \mathcal{F}} S$
+\end{itemize}
+Et subset $S \in \mathcal{F}$ `covers' de elementer der er i $S$. Problemet: Find et subset $\mathcal{C} \subseteq \mathcal{F}$ af mindst mulig størrelse s.t. $X=\bigcup_{S \in \mathcal{C}} S$. \\
+
+\textbf{Faktum.} Set-covering problemet $\in NPC$. \\
+
+\textbf{Grådig approximationsalgoritme.} \\
+
+\includegraphics[width=0.5\textwidth]{setCover.PNG}
+
+Greedy-Set-Cover er åbenlyst polynomiel.\footnote{Kører i $O(|X||\mathcal{F}| \min(|X|,|\mathcal{F}|)$ tid.} \\
+
+\textbf{Thm.} Greedy-Set-Cover er en $\rho(n)$ approximations algoritme, hvor $\rho(n)=H(\max\{|S|: S \in \mathcal{F}\})$. \footnote{$H_d=\sum_{i=1}^d 1/i$, altså det $d$te harmoniske tal.} \\
+
+\textbf{Bevis.} Vi siger at Greedy-Set-Cover tildeler en cost på 1 for hver mængde algoritmen vælger (i linje 4). Denne cost distribueres så ud over alle elementerne der dækkes \textit{for første gang} af denne mængde (d.v.s. alle elementer $x \in X$ modtager præcis én cost). Lad $S_i \in \mathcal{F}$ være den $i$te mængde som Greedy-Set-Cover vælger. Lad $c_x$ være den cost der allokeres til element $x$, $\forall x \in X$. Hvis $x$ dækkes for første gang af $S_i$, så er
+\begin{align*}
+	c_x= \frac{1}{|s_i \setminus (s_1 \cup s_2 \cup \cdots \cup s_{i-1})|}
+\end{align*} 
+Hver iteration af løkken (linje 3-6) tildeler cost 1, så
+\begin{align}
+	|\mathcal{C}|=\sum_{x \in X} c_x
+\end{align}
+Da hvert element $x \in X$ er i $\ge 1$ mængde i det \textit{optimale} cover $C^*$ har vi at:
+\begin{align}
+	\sum_{S \in \mathcal{C}^*} \sum_{x \in S} c_x \ge \sum_{x \in X} c_x
+\end{align}
+Så ved at substituere (1) ind i (2) får vi
+\begin{align}
+	\sum_{S \in \mathcal{C}^*} \sum_{x \in S} c_x \ge |\mathcal{C}|
+\end{align}
+Vi antager nu at følgende ulighed holder (den næste del af beviset er at vise at den gælder):
+\begin{align}
+	\sum_{x \in S} c_x \le H(|S|)
+\end{align}
+Ved at bruge (3) og (4) får vi:
+\begin{align*}	
+	|\mathcal{C}| \le& \sum_{S \in \mathcal{C}^*} \sum_{x \in S} c_x && \text{(Identisk med (3))} \\
+	\le& \sum_{S \in \mathcal{C}^*} H(|S|) && \text{(Følger af (4))} \\
+	\le& |\mathcal{C}^*| \cdot H(\max\{|S|: S \in \mathcal{F}\}) && \text{(Da } H(|S|) \text{ gives størst mulig værdi)}
+\end{align*}
+Dette beviser teoremet men vi mangler stadig at bevise at (4) er sand. \\
+
+\textit{Bevis for ulighed (4):} Betragt en vilkårlig mængde $S \in \mathcal{F}$ og lad 
+\begin{align*}
+	u_i=|S \setminus (S_1 \cup S_2 \cup \cdots \cup S_i)|
+\end{align*} 
+for $i=1,\ldots,k$ ($u_k$: når $S$ er covered af $S_1,\ldots,S_k$ og $S \setminus (S_1 \cup \cdots \cup S_{k-1}) \ne \emptyset$). D.v.s. $u_i$ er antallet af uncovered elementer i $S$ når algoritmen har taget mængderne $S_1,\ldots, S_i$.  Vi definerer $u_0=|S|$. \\
+
+Det er klart at $u_{i-1} \ge u_i$ fordi når $S_i$ vælges vil det dække $\ge 0$ flere elementer i $S$. Desuden dækkes $u_{i-1}-u_i$ elementer i $S$ for første gang når $S_i$ tilføjes.\\
+
+Derudover har vi at
+\begin{align}
+	|S_i \setminus (S_1 \cup S_2 \cup \cdots S_{i-1})| \ge |S \setminus (S_1 \cup S_2 \cup \cdots S_{i-1})| = u_{i-1}
+\end{align}   
+hvilket følger af at algoritmen er grådig og $S_i$ blev valgt i den $i$t iteration i løkken. Hvis vi kunne dække flere elementer med $S$ end med $S_i$ (altså hvis uligheden skulle vende den anden vej), så ville algoritmen have valgt $S$ frem for $S_i$. \\
+
+Det følger at
+\begin{align*}
+	\sum_{x \in S} c_x &= \sum_{i=1}^k (u_{i-1}-u_i) \frac{1}{|S_i \setminus S_1 \cup S_2 \cup \cdots \cup S_{i-1}|} && \text{(Distribuerer cost i hver iteration)} \\
+	&\le  \sum_{i=1}^k (u_{i-1}-u_i) \frac{1}{|S \setminus S_1 \cup S_2 \cup \cdots \cup S_{i-1}|} && \text{(Reciprok venter ulighed fra (5))} \\
+	=&  \sum_{i=1}^k (u_{i-1}-u_i) \frac{1}{u_{i-1}} && \text{(Jf. (5)})
+\end{align*}
+Vi ønsker nu at bounde denne sum: 
+\begin{align*}
+	\sum_{x \in S} c_x \le& \sum_{i=1}^k (u_{i-1}-u_i) \frac{1}{u_{i-1}} \\
+	=& \sum_{i=1}^k \sum_{j=u_i+1}^{u_{i-1}} \frac{1}{u_{i-1}} && \text{(*)} \\
+	\le& \sum_{i=1}^k \sum_{j=u_i+1}^{u_{i-1}} \frac{1}{j} && \text{(Fordi } j \le u_{i-1}) \\
+	=& \sum_{i=1}^k \bigg(\sum_{j=1}^{u_{i-1}} \frac{1}{j} - \sum_{j=1}^{u_i} \frac{1}{j} \bigg) && \text{(Ændrer anden sum så indexeret fra 1)} \\
+	=&  \sum_{i=1}^k (H(u_{i-1})-H(u_i)) \\
+	=& H(u_0-u_k) && \text{(Fordi teleskopsum)} \\
+	=& H(u_0-0) && \text{(Fordi } u_k \text{ når hele } S \text{ er covered)} \\
+	=& H(|S|) && \text{(Fordi } u_0=|S|)
+\end{align*}
+(*): Sidste led i forrige sum bliver til et sum tegn. Husk at $u_{i-1}\ge u_i$ fordi der er færre og færre uncovered elementer i $S$ for hver mængde $S_i$ der tilføjes. Vi bruger index $j$ fordi summen skal køres det antal gange der svarer til værdien af $u_{i-1}-u_i$. Vi kører fra $j=u_i+1$ til $j=u_{i-1}$. Tænk på et eksempel hvor $u_{i-1}=10$ og $u_{i}=5$. Så er $u_{i-1}-u_i=10-5=5$. For at summen kører 5 gange skal vi netop summere fra $u_i+1=5+1=6$ til $u_{i-1}=10$ -- altså 5 gange da begge er inkl. 
+\begin{flushright}
+	\qed
+\end{flushright}
